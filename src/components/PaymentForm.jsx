@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useStripe, useElements, CardElement } from "@stripe/react-stripe-js";
 import toast from "react-hot-toast";
+import { apiFetch } from "@/lib/api";
 
 const cardStyle = {
   style: {
@@ -29,10 +30,9 @@ const PaymentForm = ({ doctor, selectedSlot, user, onSuccess, onCancel }) => {
     setCardError("");
 
     try {
-      const intentRes = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/create-payment-intent`, {
+      const intentRes = await apiFetch("/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({ fee: doctor.appointmentFee }),
       });
 
@@ -57,10 +57,9 @@ const PaymentForm = ({ doctor, selectedSlot, user, onSuccess, onCancel }) => {
       }
 
       if (paymentIntent.status === "succeeded") {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/appointments`, {
+        const res = await apiFetch("/appointments", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          credentials: "include",
           body: JSON.stringify({
             doctorId: doctor._id,
             doctorName: doctor.doctorName,
