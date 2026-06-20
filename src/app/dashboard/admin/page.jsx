@@ -1,13 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
+import { apiFetch } from "@/lib/api";
 
 const AdminOverview = () => {
   const [stats, setStats] = useState(null);
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/dashboard/admin/stats`, {
-      credentials: "include",
-    })
+    apiFetch(`/dashboard/admin/stats`)
       .then((res) => res.json())
       .then(setStats);
   }, []);

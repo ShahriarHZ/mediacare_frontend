@@ -1,14 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
+import { apiFetch } from "@/lib/api";
 
 const ManageUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchUsers = () => {
-    fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/admin/users`, {
-      credentials: "include",
-    })
+    apiFetch(`/admin/users`)
       .then((res) => res.json())
       .then(setUsers)
       .finally(() => setLoading(false));
@@ -17,10 +16,9 @@ const ManageUsers = () => {
   useEffect(() => { fetchUsers(); }, []);
 
   const handleRoleChange = async (email, role) => {
-    await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/admin/users/role/${email}`, {
+    await apiFetch(`/admin/users/role/${email}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      credentials: "include",
       body: JSON.stringify({ role }),
     });
     fetchUsers();
@@ -28,9 +26,8 @@ const ManageUsers = () => {
 
   const handleDelete = async (email) => {
     if (!confirm("Are you sure you want to delete this user?")) return;
-    await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/admin/users/${email}`, {
+    await apiFetch(`/admin/users/${email}`, {
       method: "DELETE",
-      credentials: "include",
     });
     fetchUsers();
   };

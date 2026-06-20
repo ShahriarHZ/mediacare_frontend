@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { apiFetch } from "@/lib/api";
 
 const statusColors = {
   pending: "badge-warning",
@@ -12,9 +13,7 @@ const ManageDoctors = () => {
   const [loading, setLoading] = useState(true);
 
   const fetchDoctors = () => {
-    fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/admin/doctors`, {
-      credentials: "include",
-    })
+    apiFetch(`/admin/doctors`)
       .then((res) => res.json())
       .then(setDoctors)
       .finally(() => setLoading(false));
@@ -23,17 +22,15 @@ const ManageDoctors = () => {
   useEffect(() => { fetchDoctors(); }, []);
 
   const handleVerify = async (id) => {
-    await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/admin/doctors/verify/${id}`, {
+    await apiFetch(`/admin/doctors/verify/${id}`, {
       method: "PATCH",
-      credentials: "include",
     });
     fetchDoctors();
   };
 
   const handleReject = async (id) => {
-    await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/admin/doctors/reject/${id}`, {
+    await apiFetch(`/admin/doctors/reject/${id}`, {
       method: "PATCH",
-      credentials: "include",
     });
     fetchDoctors();
   };
@@ -58,10 +55,10 @@ const ManageDoctors = () => {
           <tbody>
             {doctors.map((d) => (
               <tr key={d._id}>
-                <td>{d.name}</td>
+                <td>{d.doctorName || d.name}</td>
                 <td>{d.specialization}</td>
                 <td>{d.hospital}</td>
-                <td>${d.fee}</td>
+                <td>${Number(d.appointmentFee ?? d.fee ?? 0).toFixed(2)}</td>
                 <td>
                   <span className={`badge ${statusColors[d.verificationStatus]}`}>
                     {d.verificationStatus}

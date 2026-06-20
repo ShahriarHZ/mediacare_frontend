@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { apiFetch } from "@/lib/api";
 
 const statusColors = {
   pending: "badge-warning",
@@ -13,9 +14,7 @@ const AdminAppointments = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/admin/appointments`, {
-      credentials: "include",
-    })
+    apiFetch(`/admin/appointments`)
       .then((res) => res.json())
       .then(setAppointments)
       .finally(() => setLoading(false));
