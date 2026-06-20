@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import useRole from "@/hooks/useRole";
+import { apiFetch } from "@/lib/api";
 
 const DoctorOverview = () => {
   const { session } = useRole();
@@ -8,9 +9,7 @@ const DoctorOverview = () => {
 
   useEffect(() => {
     if (!session?.user?.email) return;
-    fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/dashboard/doctor/stats/${session.user.email}`, {
-      credentials: "include",
-    })
+    apiFetch(`/dashboard/doctor/stats/${session.user.email}`)
       .then((res) => res.json())
       .then(setStats);
   }, [session]);

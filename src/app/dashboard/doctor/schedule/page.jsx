@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import useRole from "@/hooks/useRole";
+import { apiFetch } from "@/lib/api";
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 const SLOTS = ["09:00 AM", "10:00 AM", "11:00 AM", "02:00 PM", "03:00 PM", "04:00 PM"];
@@ -12,9 +13,7 @@ const SchedulePage = () => {
 
   useEffect(() => {
     if (!session?.user?.email) return;
-    fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/schedule/${session.user.email}`, {
-      credentials: "include",
-    })
+    apiFetch(`/schedule/${session.user.email}`)
       .then((res) => res.json())
       .then(setSchedule);
   }, [session]);
@@ -37,10 +36,9 @@ const SchedulePage = () => {
   };
 
   const handleSave = async () => {
-    await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/schedule/${session.user.email}`, {
+    await apiFetch(`/schedule/${session.user.email}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      credentials: "include",
       body: JSON.stringify({ schedule }),
     });
     setSaved(true);
