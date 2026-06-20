@@ -1,4 +1,4 @@
-import { betterAuth } from "better-auth";
+import { betterAuth } from "betterAuth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { MongoClient } from "mongodb";
 
@@ -15,14 +15,16 @@ export const auth = betterAuth({
     },
   },
   secret: process.env.BETTER_AUTH_SECRET,
-  trustedOrigins: ["http://localhost:3001"],
+  trustedOrigins: [
+    "http://localhost:3001",
+    "https://mediacare-frontend.vercel.app",
+  ],
 
   databaseHooks: {
     user: {
       create: {
         after: async (user, ctx) => {
           const role = ctx?.body?.role || "patient";
-
           const usersCollection = db.collection("users");
           const existingUser = await usersCollection.findOne({ email: user.email });
 
@@ -37,7 +39,6 @@ export const auth = betterAuth({
             });
           }
 
-          // If registering as a doctor, also seed a minimal pending doctor profile
           if (role === "doctor") {
             const doctorsCollection = db.collection("doctors");
             const existingDoctor = await doctorsCollection.findOne({ email: user.email });

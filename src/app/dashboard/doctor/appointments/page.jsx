@@ -109,6 +109,7 @@ const DoctorAppointments = () => {
               ))}
             </tbody>
           </table>
+          
         </div>
       )}
     </div>
