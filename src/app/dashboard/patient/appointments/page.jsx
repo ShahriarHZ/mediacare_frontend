@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import useRole from "@/hooks/useRole";
 import toast from "react-hot-toast";
+import { apiFetch } from "@/lib/api";
 
 const statusColors = {
   pending: "bg-amber-50 text-amber-700 border-amber-200",
@@ -23,9 +24,7 @@ const MyAppointments = () => {
   const fetchAppointments = () => {
     if (!user?.email) return;
     setFetching(true);
-    fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/appointments/patient/${user.email}`, {
-      credentials: "include",
-    })
+    apiFetch(`/appointments/patient/${user.email}`)
       .then((res) => {
         if (!res.ok) throw new Error();
         return res.json();
@@ -42,9 +41,8 @@ const MyAppointments = () => {
   const handleCancel = async (id) => {
     if (!confirm("Cancel this appointment?")) return;
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/appointments/cancel/${id}`, {
+      const res = await apiFetch(`/appointments/cancel/${id}`, {
         method: "PATCH",
-        credentials: "include",
       });
       if (!res.ok) throw new Error();
       toast.success("Appointment cancelled.");
@@ -59,12 +57,11 @@ const MyAppointments = () => {
     if (!symptoms.trim()) return;
     setSubmitting(true);
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_SERVER_URL}/appointments/symptoms/${selectedAppointment._id}`,
+      const res = await apiFetch(
+        `/appointments/symptoms/${selectedAppointment._id}`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          credentials: "include",
           body: JSON.stringify({ symptoms }),
         }
       );
