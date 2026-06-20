@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import useRole from "@/hooks/useRole";
+import { apiFetch } from "@/lib/api";
 
 const statusColors = {
   pending: "badge-warning",
@@ -18,9 +19,7 @@ const DoctorAppointments = () => {
 
   const fetchAppointments = () => {
     if (!session?.user?.email) return;
-    fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/appointments/doctor/${session.user.email}`, {
-      credentials: "include",
-    })
+    apiFetch(`/appointments/doctor/${session.user.email}`)
       .then((res) => res.json())
       .then(setAppointments)
       .finally(() => setLoading(false));
@@ -29,9 +28,8 @@ const DoctorAppointments = () => {
   useEffect(() => { fetchAppointments(); }, [session]);
 
   const handleAction = async (id, action) => {
-    await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/appointments/${action}/${id}`, {
+    await apiFetch(`/appointments/${action}/${id}`, {
       method: "PATCH",
-      credentials: "include",
     });
     if (action === "complete") {
       router.push(`/dashboard/doctor/prescriptions?appointmentId=${id}`);
@@ -72,8 +70,8 @@ const DoctorAppointments = () => {
                     <div className="text-xs opacity-75">{a.patientEmail}</div>
                   </td>
                   <td className="max-w-xs">
-                    <p className="truncate text-sm" title={a.problem || "No description"}>
-                      {a.problem || <span className="text-gray-400 italic">No description</span>}
+                    <p className="truncate text-sm" title={a.problem || a.symptoms || "No description"}>
+                      {a.problem || a.symptoms || <span className="text-gray-400 italic">No description</span>}
                     </p>
                   </td>
                   <td>{a.date}</td>
@@ -109,7 +107,6 @@ const DoctorAppointments = () => {
               ))}
             </tbody>
           </table>
-          
         </div>
       )}
     </div>

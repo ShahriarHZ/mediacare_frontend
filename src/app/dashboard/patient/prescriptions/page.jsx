@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import useRole from "@/hooks/useRole";
 import toast from "react-hot-toast";
+import { apiFetch } from "@/lib/api";
 
 const PrescriptionsContent = () => {
   const { user, loading: roleLoading } = useRole();
@@ -15,9 +16,7 @@ const PrescriptionsContent = () => {
   useEffect(() => {
     if (!user?.email || roleLoading) return;
     setFetching(true);
-    fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/prescriptions/patient/${user.email}`, {
-      credentials: "include",
-    })
+    apiFetch(`/prescriptions/patient/${user.email}`)
       .then((res) => {
         if (!res.ok) throw new Error();
         return res.json();
@@ -88,16 +87,16 @@ const PrescriptionsContent = () => {
                 </div>
               )}
 
-              {p.medications && (
+              {p.medicines && (
                 <div className="mb-4">
-                  <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Medications</h3>
-                  <p className="text-slate-700 text-sm bg-slate-50 rounded-xl p-3 whitespace-pre-line">{p.medications}</p>
+                  <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Medicines</h3>
+                  <p className="text-slate-700 text-sm bg-slate-50 rounded-xl p-3 whitespace-pre-line">{p.medicines}</p>
                 </div>
               )}
 
               {p.notes && (
                 <div>
-                  <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Doctor's Notes</h3>
+                  <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Doctor`s Notes</h3>
                   <p className="text-slate-700 text-sm bg-slate-50 rounded-xl p-3 italic">{p.notes}</p>
                 </div>
               )}

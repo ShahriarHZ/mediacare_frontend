@@ -2,12 +2,16 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import useRole from "@/hooks/useRole";
+import { apiFetch } from "@/lib/api";
 
 const PrescriptionsPage = () => {
   const { session } = useRole();
   const searchParams = useSearchParams();
   const appointmentId = searchParams.get("appointmentId");
+
   const [prescriptions, setPrescriptions] = useState([]);
+  const [appointment, setAppointment] = useState(null);
+  const [loadingAppointment, setLoadingAppointment] = useState(!!appointmentId);
   const [form, setForm] = useState({
     patientEmail: "",
     patientName: "",
@@ -19,21 +23,40 @@ const PrescriptionsPage = () => {
 
   const fetchPrescriptions = () => {
     if (!session?.user?.email) return;
-    fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/prescriptions/doctor/${session.user.email}`, {
-      credentials: "include",
-    })
+    apiFetch(`/prescriptions/doctor/${session.user.email}`)
       .then((res) => res.json())
       .then(setPrescriptions);
   };
+
+  useEffect(() => {
+    if (!appointmentId) {
+      setLoadingAppointment(false);
+      return;
+    }
+    apiFetch(`/appointments/${appointmentId}`)
+      .then((res) => {
+        if (!res.ok) throw new Error();
+        return res.json();
+      })
+      .then((data) => {
+        setAppointment(data);
+        setForm((prev) => ({
+          ...prev,
+          patientEmail: data.patientEmail || "",
+          patientName: data.patientName || "",
+        }));
+      })
+      .catch(() => setAppointment(null))
+      .finally(() => setLoadingAppointment(false));
+  }, [appointmentId]);
 
   useEffect(() => { fetchPrescriptions(); }, [session]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/prescriptions`, {
+    await apiFetch("/prescriptions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      credentials: "include",
       body: JSON.stringify({
         ...form,
         doctorEmail: session?.user?.email,
@@ -50,6 +73,28 @@ const PrescriptionsPage = () => {
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">Prescriptions</h1>
+
+      {appointmentId && (
+        <div className="mb-6 max-w-lg">
+          {loadingAppointment ? (
+            <div className="flex items-center gap-2 text-sm text-slate-400">
+              <span className="loading loading-spinner loading-xs"></span>
+              Loading patient`s submitted problem...
+            </div>
+          ) : appointment ? (
+            <div className="bg-teal-50 border border-teal-100 rounded-xl p-4">
+              <p className="text-xs font-bold text-teal-700 uppercase tracking-wide mb-1">
+                Patient`s Reported Symptoms
+              </p>
+              <p className="text-sm text-slate-700">
+                {appointment.problem || appointment.symptoms || "Patient has not described their problem yet."}
+              </p>
+            </div>
+          ) : (
+            <p className="text-sm text-rose-500">Could not load appointment details.</p>
+          )}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="bg-base-200 p-6 rounded-xl mb-8 space-y-3 max-w-lg">
         <h2 className="font-semibold">Write New Prescription</h2>

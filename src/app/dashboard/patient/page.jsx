@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 import useRole from "@/hooks/useRole";
+import { apiFetch } from "@/lib/api";
 
-const StatCard = ({ label, value, icon, accent }) => (
+const StatCard = ({ label, value, icon }) => (
   <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
     <div className="flex items-center justify-between mb-2">
-      <span className={`text-2xl`}>{icon}</span>
+      <span className="text-2xl">{icon}</span>
     </div>
     <p className="text-2xl font-black text-slate-800">{value}</p>
     <p className="text-xs text-slate-400 font-medium mt-1">{label}</p>
@@ -22,9 +23,7 @@ export default function PatientOverviewPage() {
     if (!user?.email) return;
 
     setFetching(true);
-    fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/dashboard/patient/stats/${user.email}`, {
-      credentials: "include",
-    })
+    apiFetch(`/dashboard/patient/stats/${user.email}`)
       .then((res) => {
         if (!res.ok) throw new Error();
         return res.json();
@@ -46,7 +45,7 @@ export default function PatientOverviewPage() {
     <div className="max-w-4xl mx-auto my-6">
       <div className="mb-6">
         <h1 className="text-2xl font-black text-slate-800 tracking-tight flex items-center gap-2">
-          <span className="bg-teal-100 text-teal-600 p-1 rounded-lg text-lg">📊</span>
+          <span className="bg-teal-50 text-teal-600 p-1 rounded-lg text-lg">📊</span>
           <span>Welcome back{user?.name ? `, ${user.name.split(" ")[0]}` : ""}</span>
         </h1>
         <p className="text-xs text-slate-400 mt-1">Here`s a quick snapshot of your healthcare activity.</p>

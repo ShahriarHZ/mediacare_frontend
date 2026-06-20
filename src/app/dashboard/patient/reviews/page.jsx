@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import useRole from "@/hooks/useRole";
 import toast from "react-hot-toast";
+import { apiFetch } from "@/lib/api";
 
 const MyReviews = () => {
   const { user, loading: roleLoading } = useRole();
@@ -15,9 +16,7 @@ const MyReviews = () => {
     if (!user?.email) return;
 
     setFetching(true);
-    fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/reviews/patient/${user.email}`, {
-      credentials: "include",
-    })
+    apiFetch(`/reviews/patient/${user.email}`)
       .then((res) => {
         if (!res.ok) throw new Error();
         return res.json();
@@ -42,10 +41,9 @@ const MyReviews = () => {
 
     setSubmitting(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/reviews`, {
+      const res = await apiFetch("/reviews", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({
           ...form,
           patientEmail: user.email,
@@ -69,9 +67,8 @@ const MyReviews = () => {
     if (!confirm("Are you sure you want to permanently delete this review?")) return;
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/reviews/${id}`, {
+      const res = await apiFetch(`/reviews/${id}`, {
         method: "DELETE",
-        credentials: "include",
       });
 
       if (!res.ok) throw new Error();

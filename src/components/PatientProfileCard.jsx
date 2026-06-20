@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import useRole from "@/hooks/useRole";
 import toast from "react-hot-toast";
+import { apiFetch } from "@/lib/api";
 
 const PatientProfileCard = () => {
   const { user, loading } = useRole();
-  const [profile, setProfile] = useState({
+  const [profile, setProfile] = useState(null);
+  const [form, setForm] = useState({
     name: "",
     phone: "",
     address: "",
@@ -16,15 +18,12 @@ const PatientProfileCard = () => {
   const [fetchingProfile, setFetchingProfile] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [form, setForm] = useState(profile);
 
   const fetchProfile = () => {
     if (!user?.email) return;
 
     setFetchingProfile(true);
-    fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/users/profile/${user.email}`, {
-      credentials: "include",
-    })
+    apiFetch(`/users/profile/${user.email}`)
       .then((res) => {
         if (!res.ok) throw new Error();
         return res.json();
@@ -58,10 +57,9 @@ const PatientProfileCard = () => {
 
     setIsSaving(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/users/profile/${user.email}`, {
+      const res = await apiFetch(`/users/profile/${user.email}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify(form),
       });
 
@@ -98,7 +96,6 @@ const PatientProfileCard = () => {
     );
   }
 
-  // ---- VIEW MODE (card) ----
   if (!isEditing) {
     return (
       <div className="max-w-2xl mx-auto my-6 p-6 sm:p-10 bg-white border border-slate-100 shadow-xl shadow-slate-100/40 rounded-2xl">
@@ -154,7 +151,6 @@ const PatientProfileCard = () => {
     );
   }
 
-  // ---- EDIT MODE (form) ----
   return (
     <div className="max-w-2xl mx-auto my-6 p-6 sm:p-10 bg-white border border-slate-100 shadow-xl shadow-slate-100/40 rounded-2xl">
       <div className="border-b border-slate-100 pb-5 mb-6">

@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import useRole from "@/hooks/useRole";
 import toast from "react-hot-toast";
+import { apiFetch } from "@/lib/api";
 
 const DoctorProfile = () => {
   const { session } = useRole();
@@ -22,9 +23,7 @@ const DoctorProfile = () => {
   const fetchProfile = () => {
     if (!session?.user?.email) return;
     setFetching(true);
-    fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/doctors/profile/${session.user.email}`, {
-      credentials: "include",
-    })
+    apiFetch(`/doctors/profile/${session.user.email}`)
       .then((res) => res.json())
       .then((data) => {
         const loaded = {
@@ -38,7 +37,6 @@ const DoctorProfile = () => {
         };
         setProfile(loaded);
         setForm(loaded);
-        // If profile is essentially empty (first time), start in edit mode
         if (!data?.specialization && !data?.appointmentFee) {
           setIsEditing(true);
         }
@@ -55,10 +53,9 @@ const DoctorProfile = () => {
     e.preventDefault();
     setSaving(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/doctors/profile/${session.user.email}`, {
+      const res = await apiFetch(`/doctors/profile/${session.user.email}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({
           ...form,
           email: session.user.email,
@@ -90,7 +87,6 @@ const DoctorProfile = () => {
     );
   }
 
-  // ---- VIEW MODE (card) ----
   if (!isEditing && profile) {
     return (
       <div className="max-w-2xl mx-auto my-6 p-6 sm:p-10 bg-white border border-slate-100 shadow-xl shadow-slate-100/40 rounded-2xl">
@@ -150,7 +146,6 @@ const DoctorProfile = () => {
     );
   }
 
-  // ---- EDIT MODE (form) ----
   return (
     <div className="max-w-lg mx-auto my-6 p-6 sm:p-8 bg-white border border-slate-100 shadow-xl shadow-slate-100/40 rounded-2xl">
       <h1 className="text-2xl font-bold mb-6">Edit Doctor Profile</h1>
