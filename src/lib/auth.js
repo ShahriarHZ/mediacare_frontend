@@ -1,12 +1,14 @@
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { MongoClient } from "mongodb";
+import { bearer } from "better-auth/plugins";
 
 const client = new MongoClient(process.env.MONGODB_URI);
 const db = client.db("medicareConnect");
 
 export const auth = betterAuth({
   database: mongodbAdapter(db),
+  baseURL: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001",
   emailAndPassword: { enabled: true },
   socialProviders: {
     google: {
@@ -19,6 +21,7 @@ export const auth = betterAuth({
     "http://localhost:3001",
     "https://mediacare-frontend.vercel.app",
   ],
+  plugins: [bearer()],
 
   databaseHooks: {
     user: {
