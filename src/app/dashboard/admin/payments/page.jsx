@@ -1,14 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
+import { apiFetch } from "@/lib/api";
 
 const AdminPayments = () => {
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/admin/payments`, {
-      credentials: "include",
-    })
+    apiFetch("/admin/payments")
       .then((res) => res.json())
       .then(setPayments)
       .finally(() => setLoading(false));

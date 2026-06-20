@@ -6,6 +6,7 @@ import {
   BarChart, Bar,
   ResponsiveContainer,
 } from "recharts";
+import { apiFetch } from "@/lib/api";
 
 const COLORS = ["#6366f1", "#22c55e", "#f59e0b", "#ef4444"];
 
@@ -13,9 +14,7 @@ const AnalyticsPage = () => {
   const [data, setData] = useState(null);
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/admin/analytics`, {
-      credentials: "include",
-    })
+    apiFetch("/admin/analytics")
       .then((res) => res.json())
       .then(setData);
   }, []);
