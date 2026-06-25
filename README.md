@@ -1,36 +1,259 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 🏥 MediCare Connect
 
-## Getting Started
+**A full-stack Hospital Appointment & Healthcare Management System**
 
-First, run the development server:
+Live Demo: [https://mediacare-frontend.vercel.app](https://mediacare-frontend.vercel.app)  
+Server API: [https://mediacare-server.onrender.com](https://mediacare-server.onrender.com)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## 📋 Project Overview
+
+MediCare Connect is a modern healthcare management platform that connects patients with verified doctors. It enables online appointment booking, secure payments, prescription management, and role-based dashboards for patients, doctors, and administrators.
+
+---
+
+## ✨ Features
+
+### 🧑‍⚕️ Patient
+- Register and log in with email/password or Google OAuth
+- Browse and search verified doctors by name, specialization, fee, experience, and rating
+- Book appointments with real-time slot selection
+- Pay consultation fees securely via **Stripe**
+- Submit health problems/symptoms to the doctor after appointment is accepted
+- View appointment status (Pending → Accepted → Completed)
+- Cancel pending appointments
+- View prescriptions written by doctors
+- Submit and manage reviews for doctors
+- View payment history with transaction IDs
+- Manage personal profile (name, phone, blood group, address, age)
+
+### 🩺 Doctor
+- Register as a doctor (pending admin verification before appearing publicly)
+- Complete profile with specialization, degree, experience, fee, hospital, bio
+- Set weekly availability schedule (days + time slots)
+- View and manage incoming appointments (Accept / Complete)
+- View patient's submitted health problem before writing prescription
+- Write prescriptions (diagnosis, medicines, notes) for completed appointments
+- View all prescriptions written
+- Dashboard overview with stats (total appointments, pending, completed, earnings)
+
+### 🔐 Admin
+- View platform-wide statistics (users, doctors, appointments, revenue)
+- Manage all users (change roles, delete accounts)
+- Verify or reject doctor registrations
+- Monitor all appointments and payments
+- View analytics (revenue over time, appointments by status, doctors by specialization)
+
+---
+
+## 🛠️ Tech Stack
+
+### Frontend (Client)
+| Technology | Purpose |
+|---|---|
+| Next.js 16 (App Router) | React framework with SSR/SSG |
+| Tailwind CSS v4 | Utility-first styling |
+| DaisyUI v5 | Component library |
+| Better Auth | Authentication (email + Google OAuth) |
+| Stripe.js + React Stripe | Payment processing |
+| Recharts | Analytics charts |
+| React Hot Toast | Notifications |
+| Framer Motion | Animations |
+
+### Backend (Server)
+| Technology | Purpose |
+|---|---|
+| Node.js + Express 5 | REST API server |
+| MongoDB (Atlas) | Database |
+| Better Auth (bearer plugin) | Session verification |
+| Stripe | Payment intent creation |
+| CORS + Cookie Parser | Security middleware |
+
+---
+
+## 🔐 Authentication & Security
+
+This project uses **Better Auth** for authentication, running inside Next.js API routes. Key security design decisions:
+
+### Role-Based Access Control
+Every user has a `role` field stored in MongoDB (`patient`, `doctor`, or `admin`). Roles are assigned at registration and enforced server-side on every protected route.
+
+### JWT / Session Flow
+1. User registers or logs in via Better Auth (email/password or Google OAuth)
+2. Better Auth issues a session token stored as an `HttpOnly` cookie on the client domain
+3. Client requests to the Express server include the session token as a **Bearer token** in the `Authorization` header (using Better Auth's bearer plugin)
+4. Express `verifySession` middleware forwards this Bearer token to Better Auth's `/api/auth/get-session` endpoint for validation
+5. On success, the user's identity is attached to `req.user` for downstream route handlers
+
+### Why Bearer Token (not cookie forwarding)?
+The client (`mediacare-frontend.vercel.app`) and server (`mediacare-server.onrender.com`) run on different domains. Browsers enforce same-origin cookie policies, so session cookies from Vercel cannot be automatically sent to Render. The Bearer token approach solves this by explicitly passing the token via `Authorization` header, which is cross-origin safe.
+
+### Protected Routes
+All sensitive Express routes use two middleware layers:
+```js
+// Authentication check
+app.get('/protected-route', verifySession, async (req, res) => { ... });
+
+// Authentication + role check
+app.get('/admin-only-route', verifySession, verifyAdmin, async (req, res) => { ... });
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## 🚀 Getting Started (Local Development)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Prerequisites
+- Node.js v18+
+- MongoDB Atlas account
+- Stripe account (test keys)
+- Google Cloud Console project (OAuth credentials)
 
-## Learn More
+### 1. Clone the repositories
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+# Client
+git clone https://github.com/ShahriarHZ/mediacare_frontend.git
+cd mediacare_frontend/client
+npm install
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Server
+git clone https://github.com/ShahriarHZ/mediacare_server.git
+cd mediacare_server
+npm install
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Generate a secret:
+```bash
+node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+```
 
-## Deploy on Vercel
+### 3. Google OAuth Setup
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+In [Google Cloud Console](https://console.cloud.google.com):
+- Create an OAuth 2.0 Client ID
+- Add `http://localhost:3001` to Authorized JavaScript Origins
+- Add `http://localhost:3001/api/auth/callback/google` to Authorized Redirect URIs
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 4. Run both servers
+
+```bash
+# Terminal 1 — Express server (port 5000)
+cd mediacare_server
+npm run dev
+
+# Terminal 2 — Next.js client (port 3001)
+cd mediacare_frontend/client
+npm run dev
+```
+
+Open `http://localhost:3001`
+
+---
+
+## 📁 Project Structure
+
+```
+mediacare_frontend/client/
+├── src/
+│   ├── app/
+│   │   ├── api/auth/[...all]/   # Better Auth route handler
+│   │   ├── dashboard/
+│   │   │   ├── patient/         # Patient dashboard pages
+│   │   │   ├── doctor/          # Doctor dashboard pages
+│   │   │   └── admin/           # Admin dashboard pages
+│   │   ├── doctors/             # Find Doctors + Doctor detail/booking
+│   │   ├── login/               # Login page
+│   │   ├── register/            # Register page
+│   │   └── layout.js            # Root layout
+│   ├── components/
+│   │   ├── Navbar.jsx
+│   │   ├── Footer.jsx
+│   │   ├── PaymentForm.jsx      # Stripe card payment
+│   │   └── PatientProfileCard.jsx
+│   ├── hooks/
+│   │   └── useRole.js           # Auth + role hook
+│   └── lib/
+│       ├── auth.js              # Better Auth server config
+│       ├── auth-client.js       # Better Auth client config
+│       ├── api.js               # Shared authenticated fetch helper
+│       └── stripe.js            # Stripe loader
+
+mediacare_server/
+├── index.js                     # Express app + all routes
+├── auth.js                      # Better Auth server config (legacy)
+├── middlewares/
+│   ├── verifyToken.js
+│   └── verifyAdmin.js
+└── package.json
+```
+
+---
+
+## 🌐 Deployment
+
+| Service | Platform | URL |
+|---|---|---|
+| Frontend (Next.js) | Vercel | https://mediacare-frontend.vercel.app |
+| Backend (Express) | Render | https://mediacare-server.onrender.com |
+| Database | MongoDB Atlas | Cloud hosted |
+
+### Deployment Notes
+- Environment variables are configured separately in Vercel and Render dashboards
+- Vercel auto-deploys on push to `main` branch of the frontend repo
+- Render auto-deploys on push to `main` branch of the server repo
+- MongoDB Atlas Network Access is set to allow all IPs (`0.0.0.0/0`) for compatibility with Vercel's dynamic IPs
+
+---
+
+## 💳 Test Payments
+
+Use Stripe's test card to simulate payments:
+
+| Field | Value |
+|---|---|
+| Card Number | `4242 4242 4242 4242` |
+| Expiry | Any future date |
+| CVC | Any 3 digits |
+| ZIP | Any 5 digits |
+
+---
+
+## 📊 Database Collections
+
+| Collection | Purpose |
+|---|---|
+| `users` | Patient, Doctor, Admin profiles with roles |
+| `doctors` | Doctor professional profiles + verification status |
+| `appointments` | Booking records with status, slot, problem description |
+| `prescriptions` | Doctor-written prescriptions linked to appointments |
+| `payments` | Payment records with Stripe transaction IDs |
+| `reviews` | Patient reviews for doctors |
+| `user`, `session`, `account` | Better Auth internal collections |
+
+---
+
+## 👥 Default Roles
+
+| Role | How to Get |
+|---|---|
+| Patient | Default role on registration |
+| Doctor | Select "Doctor" on registration → Admin must verify |
+| Admin | Manually set via Admin dashboard → Manage Users |
+
+---
+
+## 📝 License
+
+This project was built as part of the **MediCare Connect** assignment for the selection process.
+
+---
+
+## 👨‍💻 Author
+Md Shahriar Hossain Zisan
+LinkedIn : https://www.linkedin.com/in/shahriarhossain-zisan/
+Facebook : https://www.facebook.com/shahriar.zisan.864712
+Portfolio : portfolio-shahriar-zisan.netlify.app
+
+**Md Shahriar Hossain Zisan**  
+GitHub: [@ShahriarHZ](https://github.com/ShahriarHZ)
