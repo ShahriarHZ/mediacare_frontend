@@ -103,8 +103,8 @@ const MyAppointments = () => {
               Appointment with <b>{selectedAppointment.doctorName}</b>
             </p>
             <form onSubmit={handleSubmitSymptoms} className="space-y-4">
-              <textarea
-                className="textarea textarea-bordered w-full min-h-[120px] text-slate-800"
+             <textarea
+                className="textarea textarea-bordered w-full min-h-[120px] bg-white text-slate-800 placeholder:text-slate-400"
                 placeholder="Describe your symptoms, concerns, or questions for the doctor..."
                 value={symptoms}
                 onChange={(e) => setSymptoms(e.target.value)}
