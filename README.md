@@ -250,7 +250,7 @@ This project was built as part of the **MediCare Connect** assignment for the se
 ---
 
 ## 👨‍💻 Author
-Md Shahriar Hossain Zisan
+
 LinkedIn : https://www.linkedin.com/in/shahriarhossain-zisan/
 Facebook : https://www.facebook.com/shahriar.zisan.864712
 Portfolio : portfolio-shahriar-zisan.netlify.app
